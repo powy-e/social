@@ -44,7 +44,7 @@ fn ementa(day: usize, all: bool) {
     let response = reqwest::blocking::get(current_day).unwrap().text().unwrap();
     let document = Document::from(response.as_str());
 
-    println!("{}", day);
+    println!("{}", WEEK_DAYS[day]);
     let mut i = 0;
     let mut z = 0;
     let mut lunch = true;
