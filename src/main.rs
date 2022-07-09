@@ -2,9 +2,9 @@ use std::{ascii::AsciiExt, process::exit, vec};
 
 use chrono::Datelike;
 use clap::{ArgEnum, Parser};
+use dict::{Dict, DictIface};
 use select::{document::Document, predicate::Attr};
 use termion::{color, style};
-use dict:: {Dict, DictIface};
 const WEEK_DAYS: [&str; 5] = [
     "Segunda-Feira",
     "Terça-Feira",
@@ -38,35 +38,29 @@ fn ementa(day: usize, all: bool) {
     let url = "https://eatdreamsmile.pt/";
     let mut current_day = String::new();
     let mut info = Vec::<String>::new();
-    for day in WEEK_DAYS {
-        current_day = url.to_string();
-        current_day.push_str(day.to_lowercase().replace("ç", "c").as_str());
+    current_day = url.to_string();
+    current_day.push_str(WEEK_DAYS[day].to_lowercase().replace("ç", "c").as_str());
 
-        let response = reqwest::blocking::get(current_day).unwrap().text().unwrap();
-        let document = Document::from(response.as_str());
+    let response = reqwest::blocking::get(current_day).unwrap().text().unwrap();
+    let document = Document::from(response.as_str());
 
-        println!("{}", day);
-        let mut i = 0;
-        let mut z = 0;
-        let mut lunch = true;
-        let mut dic = Dict::<String>::new();
-        for node in document.find(Attr("class", "wpb_wrapper")) {
-            if i>=3 {
-                for child in node.children() {
-                    if child.name() == Some("h4") {
-                        
-                        info.push(child.text());
-
-                        z += 1;
-                    }
+    println!("{}", day);
+    let mut i = 0;
+    let mut z = 0;
+    let mut lunch = true;
+    let mut dic = Dict::<String>::new();
+    for node in document.find(Attr("class", "wpb_wrapper")) {
+        if i >= 3 {
+            for child in node.children() {
+                if child.name() == Some("h4") {
+                    info.push(child.text().replace("\n", ""));
+                    z += 1;
                 }
-                
             }
-            i += 1;
         }
-        println!("{:?}", info);
-        break;
+        i += 1;
     }
+    println!("{:?}", info);
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum, Debug)]
