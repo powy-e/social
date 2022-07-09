@@ -1,8 +1,10 @@
+use std::{ascii::AsciiExt, process::exit, vec};
+
 use chrono::Datelike;
 use clap::{ArgEnum, Parser};
 use select::{document::Document, predicate::Attr};
 use termion::{color, style};
-
+use dict:: {Dict, DictIface};
 const WEEK_DAYS: [&str; 5] = [
     "Segunda-Feira",
     "Terça-Feira",
@@ -33,36 +35,37 @@ macro_rules! red {
 }
 
 fn ementa(day: usize, all: bool) {
-    let url = "https://www.sas.ulisboa.pt/unidade-alimentar-tecnico-alameda";
-    let response = reqwest::blocking::get(url).unwrap().text().unwrap();
-    let document = Document::from(response.as_str());
-    let mut i = 0;
-    let mut first = true;
-    for node in document.find(Attr("class", "menus")) {
-        if all || i == day {
-            for child in node.children() {
-                for subchild in child.children() {
-                    let mut text = subchild.text();
-                    if text != "" && !text.contains("Alameda") && text != "Linha" {
-                        if text.contains("202") {
-                            text = format!("{} - {}", WEEK_DAYS[i], text);
-                            if !first {
-                                println!("");
-                            }
-                            first = false;
-                            println!("{}", underline!(bold!(text)));
-                        } else if text == "Almoço" || text == "Jantar" || text == "Macrobiótica" {
-                            println!("\n{}", bold!(text));
-                        } else if text.contains("Contêm") {
-                            println!("{}", red!(text));
-                        } else {
-                            println!("{}", text);
-                        }
+    let url = "https://eatdreamsmile.pt/";
+    let mut current_day = String::new();
+    let mut info = Vec::<String>::new();
+    for day in WEEK_DAYS {
+        current_day = url.to_string();
+        current_day.push_str(day.to_lowercase().replace("ç", "c").as_str());
+
+        let response = reqwest::blocking::get(current_day).unwrap().text().unwrap();
+        let document = Document::from(response.as_str());
+
+        println!("{}", day);
+        let mut i = 0;
+        let mut z = 0;
+        let mut lunch = true;
+        let mut dic = Dict::<String>::new();
+        for node in document.find(Attr("class", "wpb_wrapper")) {
+            if i>=3 {
+                for child in node.children() {
+                    if child.name() == Some("h4") {
+                        
+                        info.push(child.text());
+
+                        z += 1;
                     }
                 }
+                
             }
+            i += 1;
         }
-        i += 1;
+        println!("{:?}", info);
+        break;
     }
 }
 
