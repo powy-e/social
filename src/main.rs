@@ -47,8 +47,8 @@ fn ementa(day: usize, all: bool) {
     println!("{}", WEEK_DAYS[day]);
     let mut i = 0;
     let mut z = 0;
-    let mut lunch = true;
-    let mut dic = Dict::<String>::new();
+    let lunch = true;
+    let dic = Dict::<String>::new();
     for node in document.find(Attr("class", "wpb_wrapper")) {
         if i >= 3 {
             for child in node.children() {
@@ -60,6 +60,13 @@ fn ementa(day: usize, all: bool) {
         }
         i += 1;
     }
+    info[0] = info[0].replace("Sopa: ", "");
+    info[1] = info[1].replace("Prato Mediterrânico: ", "");
+    info[2] = info[2].replace("Prato Vegetariano: ", "");
+    info[3] = info[3].replace("Sopa: ", "");
+    info[4] = info[4].replace("Prato Mediterrânico: : ", "");
+    info[5] = info[5].replace("Prato Vegetariano: ", "");
+
     println!("{:?}", info);
 }
 
