@@ -1,10 +1,28 @@
-use std::{ascii::AsciiExt, process::exit, vec};
+//use std::{ process::exit, vec};
 
 use chrono::Datelike;
 use clap::{ArgEnum, Parser};
-use dict::{Dict, DictIface};
 use select::{document::Document, predicate::Attr};
-use termion::{color, style};
+//use termion::{color, style};
+//use serde_json::{Value, json};
+use serde::{Deserialize, Serialize};
+//use serde_json::Result;
+
+
+#[derive(Deserialize, Serialize, Debug)]
+struct Menu {
+    sopa: String,
+    vegetariano: String,
+    principal: String,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+struct EmentaDia {
+    almoco: Menu,
+    jantar: Menu,
+}
+
+
 const WEEK_DAYS: [&str; 5] = [
     "Segunda-Feira",
     "Terça-Feira",
@@ -38,6 +56,7 @@ fn ementa(day: usize, all: bool) {
     let url = "https://eatdreamsmile.pt/";
     let mut current_day = String::new();
     let mut info = Vec::<String>::new();
+
     current_day = url.to_string();
     current_day.push_str(WEEK_DAYS[day].to_lowercase().replace("ç", "c").as_str());
 
@@ -48,7 +67,6 @@ fn ementa(day: usize, all: bool) {
     let mut i = 0;
     let mut z = 0;
     let lunch = true;
-    let dic = Dict::<String>::new();
     for node in document.find(Attr("class", "wpb_wrapper")) {
         if i >= 3 {
             for child in node.children() {
@@ -67,7 +85,13 @@ fn ementa(day: usize, all: bool) {
     info[4] = info[4].replace("Prato Mediterrânico: : ", "");
     info[5] = info[5].replace("Prato Vegetariano: ", "");
 
-    println!("{:?}", info);
+    let almoço = Menu {
+        sopa: info[0].to_string(),
+        vegetariano: info[1].to_string(),
+        principal: info[2].to_string()
+    };
+
+    println!("{:?}", almoço);
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum, Debug)]
@@ -110,5 +134,5 @@ fn main() {
             .unwrap(),
     };
 
-    ementa(day, args.all);
+    ementa(0, args.all);
 }
